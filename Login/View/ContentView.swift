@@ -77,9 +77,12 @@ struct Home: View{
     }
 
 struct InicioSesionView: View{
+  //  @ObservedObject var binddata = logViewModel()
+    @ObservedObject var lModel = loginModel
    @StateObject var request = logViewModel()
-        @State var correo:String = ""
-        @State var contraseña:String = ""
+  
+    @State var correo:String = ""
+    @State var contraseña:String = ""
     @State var isPantallaHomeActive:Bool = false
     @State var isForgetPassActive:Bool = false
         var body: some View {
@@ -136,7 +139,9 @@ struct InicioSesionView: View{
                                            .padding(EdgeInsets(top: 11, leading: 18, bottom: 11, trailing: 18))
                                            .overlay(RoundedRectangle(cornerRadius: 6)
                                                         .stroke(Color.blue, lineWidth: 3).shadow(color: .white, radius: 6))
-                                   }.padding(EdgeInsets(top: 1, leading: 15, bottom: 1, trailing: 15))
+                   }.padding(EdgeInsets(top: 1, leading: 15, bottom: 1, trailing: 15))
+               
+               
                    Spacer()
                    
                }
@@ -165,9 +170,20 @@ struct InicioSesionView: View{
             
              print("Mi correo es \(correo) y mi contraseña es \(contraseña)")
         
-        isPantallaHomeActive=true
+     //   isPantallaHomeActive=true
+       
         request.requestvoid(pass: contraseña, mail: correo)
-      
+        print("data del output   \(String(describing: request.loginData))")
+        let respCode : Int? =  self.lModel.
+        if respCode != nil {
+            if(respCode == 100)
+            {
+                isPantallaHomeActive = true
+            }else{
+                print("respuesta del servidor incorrecta")
+            }
+        }
+
         
         }
     func forgotPass(){

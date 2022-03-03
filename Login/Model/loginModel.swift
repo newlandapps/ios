@@ -8,7 +8,7 @@
 import Foundation
 
 struct loginModel:Codable{
-    var responseCode: Int
+    var responseCode: Int?
     var message: String
     var data: LoginData?
     

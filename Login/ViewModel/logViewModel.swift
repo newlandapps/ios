@@ -7,7 +7,9 @@
 
 import Foundation
 class logViewModel :ObservableObject{
-    @Published var loginData = [loginModel]()
+    @Published var loginData : loginModel!
+    
+    
     var nameUser=InicioSesionView().correo
     var passw=InicioSesionView().contraseña
     func requestvoid(pass:String,mail:String){
@@ -16,35 +18,50 @@ class logViewModel :ObservableObject{
         let url=URL(string:"https://avocado-cloud.com/WS-phoenixApiPROD/login/loginApp")!
         var request = URLRequest (url: url)
         
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
+       
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpMethod="POST"
-        let parameters: [String: String]=[
+        request.timeoutInterval=20;
+        let parameters: [String: AnyHashable]=[
             "password":passw,
             "user":nameUser
         ]
-        guard let finalBody=try? JSONEncoder().encode(parameters)else{
-            return
-        }
-        request.httpBody=finalBody
+//        guard let finalBody=try? JSONEncoder().encode(parameters)else{
+//            return
+//        }
+        request.httpBody=try? JSONSerialization.data(withJSONObject: parameters, options: .fragmentsAllowed)
       
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-        
+        let task = URLSession.shared.dataTask(with: request) { data,_, error in
+            guard let data=data,error == nil else{
+                return
+            }
             do{
-                if let jsonData=data{
-                    print("tamaño de JSON\(jsonData)")
-                    let decodeData = try
-                    JSONDecoder().decode([loginModel].self, from: jsonData)
-                    DispatchQueue.main.async {
-                        self.loginData.append(contentsOf: decodeData)
-                    }
+                let response=try JSONSerialization.jsonObject(with: data, options: .allowFragments)
+              //  print ("Success: \(response)")
+                
+                let decoder = JSONDecoder()
+                let json = try decoder.decode(loginModel.self, from: data)
+                
+                DispatchQueue.main.async {
+                
+                    self.loginData=json
+                    print("  res: \(self.loginData.responseCode).......+\(String(describing: self.loginData.data?.token)).......+\(self.loginData.message)")
                 }
+//                if let jsonData=data{
+//                    let decodeData=try
+//                    JSONDecoder().decode(loginModel.self, from: jsonData)
+//                    DispatchQueue.main.async {
+//                        self.loginData.message.append(contentsOf: decodeData)
+//                    }
+//                }
+                
             }catch{
                 print("error catch : \(error )")
             }
         
         
-        }.resume()
+        }
+        task.resume()
     }
 }
